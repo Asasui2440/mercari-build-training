@@ -85,10 +85,11 @@ func (s Server) Run() int {
 	mux.HandleFunc("GET /items/{id}", h.GetItem)
 	mux.HandleFunc("GET /items", h.GetAllItems)
 	mux.HandleFunc("GET /search", h.Getkeyword)
+	mux.HandleFunc("DELETE /items/{id}", h.DeleteItem)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{frontURL},
-		AllowedMethods:   []string{"GET", "HEAD", "POST", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "HEAD", "POST", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
 	})
@@ -423,4 +424,37 @@ func (s *Handlers) buildImagePath(imageFileName string) (string, error) {
 	}
 
 	return imgPath, nil
+}
+
+// Delete item handlers
+func (s *Handlers) DeleteItem(w http.ResponseWriter, r *http.Request) {
+	// get id from URL
+	idStr := strings.TrimPrefix(r.URL.Path, "/items/")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid item ID", http.StatusBadRequest)
+		return
+	}
+
+	// delete Item
+	err = s.repo.DeleteItem(r.Context(), id)
+	if err != nil {
+		// confirm item not found from error message
+		if strings.Contains(err.Error(), "not found") {
+			http.Error(w, "Item not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Failed to delete item", http.StatusInternalServerError)
+		log.Println("Failed to delete item:", err)
+		return
+	}
+
+	// return response
+	w.Header().Set("Content-Type", "application/json")
+	response := map[string]string{"message": fmt.Sprintf("Item with ID %d successfully deleted", id)}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		log.Println("Failed to encode response:", err)
+		return
+	}
 }
