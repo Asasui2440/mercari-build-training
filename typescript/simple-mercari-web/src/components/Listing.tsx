@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRef, useState } from 'react';
 import { postItem } from '~/api';
 
