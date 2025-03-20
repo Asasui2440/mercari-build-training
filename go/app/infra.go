@@ -16,7 +16,7 @@ import (
 var errImageNotFound = errors.New("image not found")
 
 type Item struct {
-	ID       int    `db:"id" json:"id"` // add id to json
+	ID       int    `db:"id" json:"-"`
 	Name     string `db:"name" json:"name"`
 	Category string `db:"category" json:"category"`
 	Image    string `db:"image_name" json:"image"`
@@ -32,7 +32,6 @@ type ItemRepository interface {
 	GetItemByID(ctx context.Context, id int) (*Item, error)
 	GetKeyword(ctx context.Context, keyword string) ([]Item, error)
 	AddItem(ctx context.Context, item *Item) (*Item, error)
-	DeleteItem(ctx context.Context, id int) error
 }
 
 // itemRepository is an implementation of ItemRepository
@@ -146,6 +145,7 @@ func (i *itemRepository) GetItemByID(ctx context.Context, id int) (*Item, error)
 		return nil, fmt.Errorf("failed to fetch item: %w", err)
 	}
 	return &item, nil
+
 }
 
 func (i *itemRepository) GetAll(ctx context.Context) ([]Item, error) {
@@ -199,23 +199,4 @@ func (i *itemRepository) GetKeyword(ctx context.Context, keyword string) ([]Item
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 	return items, nil
-}
-
-// Delete Item function
-func (i *itemRepository) DeleteItem(ctx context.Context, id int) error {
-	item, err := i.GetItemByID(ctx, id)
-	if err != nil {
-		return fmt.Errorf("failed to check item existence: %w", err)
-	}
-	if item == nil {
-		return fmt.Errorf("item with ID %d not found", id)
-	}
-
-	// delete the item
-	_, err = i.db.ExecContext(ctx, "DELETE FROM items WHERE id = ?", id)
-	if err != nil {
-		return fmt.Errorf("failed to delete item: %w", err)
-	}
-
-	return nil
 }
