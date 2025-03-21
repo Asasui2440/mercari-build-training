@@ -18,12 +18,11 @@ RUN addgroup -S mercari && adduser -S trainee -G mercari && \
     chown -R trainee:mercari /app
 
 # make images directory and set the owner 
-# Set permissions on the directory and all files within it to "user and group read, write and execute"
 RUN mkdir -p /app/images && \
     chown -R trainee:mercari /app/db /app/images
 
 # build main.go
-RUN go build -o server cmd/api/main.go
+RUN go build -o server ./cmd/api/main.go
 
 #  set the path to items.db and images (setting environment variables)
 ENV DB_PATH=/app/db/items.db
