@@ -33,4 +33,5 @@ ENV IMAGE_DIR=/app/images
 USER trainee
 
 # launch the server 
+# IMAGE_DIRを表示
 CMD ["sh", "-c", "echo $IMAGE_DIR && ./server"]
