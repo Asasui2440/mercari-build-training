@@ -14,6 +14,7 @@ import (
 )
 
 var errImageNotFound = errors.New("image not found")
+var ErrInvalidInput = errors.New("invalid input")
 
 type Item struct {
 	ID       int    `db:"id" json:"id"` // add id to json
@@ -116,7 +117,6 @@ func (i *itemRepository) AddItem(ctx context.Context, item *Item) (*Item, error)
 // StoreImage stores an image and returns an error if any.
 // This package doesn't have a related interface for simplicity.
 func StoreImage(fileName string, image []byte) error {
-
 	relPath := "images"
 	filePath := filepath.Join(relPath, fileName)
 

@@ -14,24 +14,23 @@ RUN go mod download
 COPY . ./
 
 # create user and group, and set the permission
-RUN addgroup -S mercari && adduser -S trainee -G mercari \
-    && chown -R trainee:mercari /app/db /app/images
-
+RUN addgroup -S mercari && adduser -S trainee -G mercari && \
+    chown -R trainee:mercari /app
 
 # make images directory and set the owner 
 RUN mkdir -p /app/images && \
-    chown -R trainee:mercari /app/db /app/images
+    chown -R trainee:mercari /app/db /app/images && \
+    chmod -R 770 /app/db /app/images  
 
 # build main.go
-RUN go build -o server ./cmd/api/main.go
+RUN go build -o server cmd/api/main.go
 
-#  set the path to items.db　and images (setting environment variables)
+#  set the path to items.db and images (setting environment variables)
 ENV DB_PATH=/app/db/items.db
 ENV IMAGE_DIR=/app/images
-
 
 # set the execution user in the container
 USER trainee
 
 # launch the server 
-CMD ["./server"]
+CMD ["sh", "-c", "echo $IMAGE_DIR && ./server"]

@@ -33,8 +33,6 @@ func NewHandlers(imageDirPath string) *Handlers {
 	}
 }
 
-var ErrInvalidInput = errors.New("invalid input")
-
 // Run is a method to start the server.
 // This method returns 0 if the server started successfully, and 1 otherwise.
 func (s Server) Run() int {
@@ -61,13 +59,15 @@ func (s Server) Run() int {
 		return 1
 	}
 
-	imageDir, found := os.LookupEnv("IMAGE_DIR_PATH")
-	if !found {
+	imageDir, found := os.LookupEnv("IMAGE_DIR")
+	if found {
+		s.ImageDirPath = imageDir
+	} else {
 		s.ImageDirPath = "images"
-		log.Println("Using default image directory: ", s.ImageDirPath)
+		slog.Info("Using default image directory: ", s.ImageDirPath)
 	}
 
-	s.ImageDirPath = imageDir
+	slog.Info("Using image directory: ", "path", s.ImageDirPath)
 
 	// set up handlers
 	h := &Handlers{imageDirPath: s.ImageDirPath, db: db, repo: repo}
@@ -192,7 +192,7 @@ func (s *Handlers) AddItem(w http.ResponseWriter, r *http.Request) {
 	//save image
 	var fileName string
 	if req.Image != nil {
-		storedFileName, err := s.storeImage(req.Image)
+		storedFileName, err := s.storeImage(req.Image, "images")
 		if err != nil {
 			slog.Error("failed to store image: ", "error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -329,16 +329,15 @@ func (s *Handlers) Getkeyword(w http.ResponseWriter, r *http.Request) {
 // storeImage stores an image and returns the file path and an error if any.
 // this method calculates the hash sum of the image as a file name to avoid the duplication of a same file
 // and stores it in the image directory.
-func (s *Handlers) storeImage(image []byte) (filePath string, err error) {
-	s.imageDirPath = "images"
-	if s.imageDirPath == "" {
+func (s *Handlers) storeImage(image []byte, dirPath string) (filePath string, err error) {
+	if dirPath == "" {
 		return "", fmt.Errorf("image directory path is not set")
 	}
 
 	hash := sha256.Sum256(image)
 	hashStr := hex.EncodeToString(hash[:])
-	fileName := hashStr + ".jpg"                       // - calc hash sum
-	filePath = filepath.Join(s.imageDirPath, fileName) // - build image file path
+	fileName := hashStr + ".jpg"                // - calc hash sum
+	filePath = filepath.Join(dirPath, fileName) // - build image file path
 
 	if _, err := os.Stat(filePath); err == nil {
 		return fileName, nil //if the file already exists, just return file
@@ -346,7 +345,7 @@ func (s *Handlers) storeImage(image []byte) (filePath string, err error) {
 		return "", fmt.Errorf("failed to check image file existence: %w", err)
 	}
 
-	if err := os.MkdirAll(s.imageDirPath, 0755); err != nil {
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
 		return "", fmt.Errorf("failed to create image directory: %w", err)
 	}
 
@@ -354,7 +353,7 @@ func (s *Handlers) storeImage(image []byte) (filePath string, err error) {
 		return "", fmt.Errorf("failed to save image: %w", err)
 	}
 	log.Println("Image successfully stored")
-	return fileName, nil // - return the image file path
+	return filePath, nil // - return the image file path
 }
 
 type GetImageRequest struct {
