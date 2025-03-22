@@ -1,0 +1,24 @@
+services:
+  app:
+    build: 
+      context: ./go
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      FRONT_URL: "http://localhost:3000"  
+      IMAGE_DIR: "/app/images"
+    volumes:
+      - ./go/images:/app/images
+      - ./go/db:/app/db
+
+  web:
+    build: 
+      context: ./typescript/simple-mercari-web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: "http://localhost:9000"  
+    depends_on:
+      - app
