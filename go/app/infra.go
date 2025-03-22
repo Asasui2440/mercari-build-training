@@ -85,7 +85,7 @@ func (i *itemRepository) Insert(ctx context.Context, item *Item) error {
 		return fmt.Errorf("failed to fetch category ID: %w", err)
 	}
 	if item.Name == "" || item.Category == "" {
-		return ErrInvalidInput
+		return errInvalidInput
 	}
 
 	// insert the item to items.table

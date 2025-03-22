@@ -214,7 +214,7 @@ func (s *Handlers) AddItem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Failed to insert item:", err)
 
-		if errors.Is(err, ErrInvalidInput) {
+		if errors.Is(err, errInvalidInput) {
 			http.Error(w, "Invalid input", http.StatusBadRequest) //400
 		} else {
 			http.Error(w, "Database error", http.StatusInternalServerError) //500
