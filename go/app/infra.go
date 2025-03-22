@@ -14,7 +14,7 @@ import (
 )
 
 var errImageNotFound = errors.New("image not found")
-var ErrInvalidInput = errors.New("invalid input")
+var errInvalidInput = errors.New("invalid input")
 
 type Item struct {
 	ID       int    `db:"id" json:"id"` // add id to json
