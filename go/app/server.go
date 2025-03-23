@@ -33,6 +33,9 @@ func NewHandlers(imageDirPath string) *Handlers {
 	}
 }
 
+var errImageNotFound = errors.New("image not found")
+var errInvalidInput = errors.New("invalid input")
+
 // Run is a method to start the server.
 // This method returns 0 if the server started successfully, and 1 otherwise.
 func (s Server) Run() int {
@@ -86,6 +89,7 @@ func (s Server) Run() int {
 	mux.HandleFunc("GET /items", h.GetAllItems)
 	mux.HandleFunc("GET /search", h.Getkeyword)
 	mux.HandleFunc("DELETE /items/{id}", h.DeleteItem)
+	mux.HandleFunc("GET /", h.Hello)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{frontURL},
@@ -120,7 +124,10 @@ type AddItemRequest struct {
 }
 
 type AddItemResponse struct {
-	Message string `json:"message"`
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Category string `json:"category"`
+	Image    string `json:"image"`
 }
 
 func (s *Handlers) Hello(w http.ResponseWriter, r *http.Request) {
@@ -223,11 +230,11 @@ func (s *Handlers) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// return response
-	response := map[string]interface{}{
-		"id":       item.ID,
-		"name":     item.Name,
-		"category": item.Category,
-		"image":    item.Image,
+	response := AddItemResponse{
+		ID:       item.ID,
+		Name:     item.Name,
+		Category: item.Category,
+		Image:    item.Image,
 	}
 
 	// return JSON response
