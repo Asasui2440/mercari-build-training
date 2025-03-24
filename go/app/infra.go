@@ -197,7 +197,7 @@ func (i *itemRepository) GetKeyword(ctx context.Context, keyword string) ([]Item
 	return items, nil
 }
 
-// DeleteItem function - improved version that also resets ID sequence
+// DeleteItem function
 func (i *itemRepository) DeleteItem(ctx context.Context, id int) error {
 	item, err := i.GetItemByID(ctx, id)
 	if err != nil {

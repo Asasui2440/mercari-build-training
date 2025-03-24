@@ -67,7 +67,8 @@ func (s Server) Run() int {
 		s.ImageDirPath = imageDir
 	} else {
 		s.ImageDirPath = "images"
-		slog.Info("Using default image directory: ", s.ImageDirPath)
+		slog.Info("Using default image directory", "path", s.ImageDirPath)
+
 	}
 
 	slog.Info("Using image directory: ", "path", s.ImageDirPath)
@@ -121,13 +122,6 @@ type AddItemRequest struct {
 	Name     string `form:"name"`
 	Category string `form:"category"`
 	Image    []byte `form:"image"`
-}
-
-type AddItemResponse struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Category string `json:"category"`
-	Image    string `json:"image"`
 }
 
 func (s *Handlers) Hello(w http.ResponseWriter, r *http.Request) {
@@ -184,15 +178,10 @@ func parseAddItemRequest(r *http.Request) (*AddItemRequest, error) {
 
 // AddItem is a handler to add a new item for POST /items .
 func (s *Handlers) AddItem(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(10 << 20)
-	if err != nil {
-		http.Error(w, "failed to parse form", http.StatusBadRequest)
-		return
-	}
-
 	req, err := parseAddItemRequest(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println("failed to parse request:", err)
 		return
 	}
 
@@ -230,11 +219,8 @@ func (s *Handlers) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// return response
-	response := AddItemResponse{
-		ID:       item.ID,
-		Name:     item.Name,
-		Category: item.Category,
-		Image:    item.Image,
+	response := map[string]string{
+		"message": fmt.Sprintf("item received: %s", item.Name),
 	}
 
 	// return JSON response
