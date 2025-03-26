@@ -71,14 +71,18 @@ func TestParseAddItemRequest(t *testing.T) {
 				err: true, //Error due to missing Category
 			},
 		},
-		"ng: missing image": {
+		"ok: missing image (default applied)": {
 			args: map[string][]byte{
 				"name":     []byte("sample_name"),
 				"category": []byte("sample_category"),
 			},
 			wants: wants{
-				req: nil,
-				err: true, // Error due to missing Image
+				req: &AddItemRequest{
+					Name:     "sample_name",
+					Category: "sample_category",
+					Image:    []byte("default.jpg"),
+				},
+				err: false,
 			},
 		},
 		"ng: empty request": {
@@ -322,7 +326,7 @@ func TestAddItemE2e(t *testing.T) {
 			args: map[string][]byte{
 				"name":       []byte(""),
 				"category":   []byte("phone"),
-				"image_name": []byte("fake image data"),
+				"image_name": []byte("default.jpg"),
 			},
 			wants: wants{
 				code: http.StatusBadRequest,

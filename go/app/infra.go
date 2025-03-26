@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -12,9 +11,6 @@ import (
 	// STEP 5-1: uncomment this line
 	_ "github.com/mattn/go-sqlite3"
 )
-
-var errImageNotFound = errors.New("image not found")
-var errInvalidInput = errors.New("invalid input")
 
 type Item struct {
 	ID       int    `db:"id" json:"id"` // add id to json
@@ -201,7 +197,7 @@ func (i *itemRepository) GetKeyword(ctx context.Context, keyword string) ([]Item
 	return items, nil
 }
 
-// Delete Item function
+// DeleteItem function
 func (i *itemRepository) DeleteItem(ctx context.Context, id int) error {
 	item, err := i.GetItemByID(ctx, id)
 	if err != nil {

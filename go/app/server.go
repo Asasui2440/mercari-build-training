@@ -33,6 +33,9 @@ func NewHandlers(imageDirPath string) *Handlers {
 	}
 }
 
+var errImageNotFound = errors.New("image not found")
+var errInvalidInput = errors.New("invalid input")
+
 // Run is a method to start the server.
 // This method returns 0 if the server started successfully, and 1 otherwise.
 func (s Server) Run() int {
@@ -64,7 +67,8 @@ func (s Server) Run() int {
 		s.ImageDirPath = imageDir
 	} else {
 		s.ImageDirPath = "images"
-		slog.Info("Using default image directory: ", s.ImageDirPath)
+		slog.Info("Using default image directory", "path", s.ImageDirPath)
+
 	}
 
 	slog.Info("Using image directory: ", "path", s.ImageDirPath)
@@ -86,6 +90,7 @@ func (s Server) Run() int {
 	mux.HandleFunc("GET /items", h.GetAllItems)
 	mux.HandleFunc("GET /search", h.Getkeyword)
 	mux.HandleFunc("DELETE /items/{id}", h.DeleteItem)
+	mux.HandleFunc("GET /", h.Hello)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{frontURL},
@@ -117,10 +122,6 @@ type AddItemRequest struct {
 	Name     string `form:"name"`
 	Category string `form:"category"`
 	Image    []byte `form:"image"`
-}
-
-type AddItemResponse struct {
-	Message string `json:"message"`
 }
 
 func (s *Handlers) Hello(w http.ResponseWriter, r *http.Request) {
@@ -177,15 +178,10 @@ func parseAddItemRequest(r *http.Request) (*AddItemRequest, error) {
 
 // AddItem is a handler to add a new item for POST /items .
 func (s *Handlers) AddItem(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(10 << 20)
-	if err != nil {
-		http.Error(w, "failed to parse form", http.StatusBadRequest)
-		return
-	}
-
 	req, err := parseAddItemRequest(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println("failed to parse request:", err)
 		return
 	}
 
@@ -223,11 +219,8 @@ func (s *Handlers) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// return response
-	response := map[string]interface{}{
-		"id":       item.ID,
-		"name":     item.Name,
-		"category": item.Category,
-		"image":    item.Image,
+	response := map[string]string{
+		"message": fmt.Sprintf("item received: %s", item.Name),
 	}
 
 	// return JSON response
