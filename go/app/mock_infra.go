@@ -49,6 +49,15 @@ func (mr *MockItemRepositoryMockRecorder) AddItem(ctx, item interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddItem", reflect.TypeOf((*MockItemRepository)(nil).AddItem), ctx, item)
 }
 
+func (m *MockItemRepository) DeleteItem(ctx context.Context, id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteItem", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+
+
 // GetAll mocks base method.
 func (m *MockItemRepository) GetAll(ctx context.Context) ([]Item, error) {
 	m.ctrl.T.Helper()
@@ -63,6 +72,7 @@ func (mr *MockItemRepositoryMockRecorder) GetAll(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockItemRepository)(nil).GetAll), ctx)
 }
+
 
 // GetItemByID mocks base method.
 func (m *MockItemRepository) GetItemByID(ctx context.Context, id int) (*Item, error) {
@@ -106,4 +116,10 @@ func (m *MockItemRepository) Insert(ctx context.Context, item *Item) error {
 func (mr *MockItemRepositoryMockRecorder) Insert(ctx, item interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockItemRepository)(nil).Insert), ctx, item)
+}
+
+
+func (mr *MockItemRepositoryMockRecorder) DeleteItem(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteItem", reflect.TypeOf((*MockItemRepository)(nil).DeleteItem), ctx, id)
 }

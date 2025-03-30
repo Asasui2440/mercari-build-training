@@ -27,7 +27,7 @@ export const ItemList = ({ reload, onLoadCompleted }: Prop) => {
           console.log("First item ID:", data[0].id);
           console.log("First item ID type:", typeof data[0].id);
         }
-        setItems(data);
+        setItems(data || []);
         onLoadCompleted();
       } catch (error) {
         console.error('GET error:', error);
